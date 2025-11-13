@@ -1,8 +1,8 @@
 """
 Logging module for TikTok Global Trends.
 
-Provides centralized logging configuration with support for multiple log levels,
-file output, and structured JSON logging.
+Provides centralized logging configuration with support for multiple log
+levels, file output, and structured JSON logging.
 """
 
 import json
@@ -11,7 +11,6 @@ import logging.handlers
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 
 class JSONFormatter(logging.Formatter):
@@ -73,8 +72,8 @@ def setup_logger(
 
     # Create formatters
     if json_format:
-        formatter = JSONFormatter()
-        console_formatter = JSONFormatter()
+        formatter: logging.Formatter = JSONFormatter()
+        console_formatter: logging.Formatter = JSONFormatter()
     else:
         formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
