@@ -1,7 +1,8 @@
 """
 Database Module
 
-Manages all database operations including CRUD operations and schema management.
+Manages all database operations including CRUD operations and schema
+management.
 """
 
 from sqlalchemy import create_engine

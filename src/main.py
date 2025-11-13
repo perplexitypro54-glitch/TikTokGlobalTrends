@@ -1,8 +1,9 @@
 """
 TikTok Global Trends - Main Entry Point
 
-This module serves as the primary orchestrator for the TikTok Global Trends application.
-It initializes all necessary components and launches the UI or backend services.
+This module serves as the primary orchestrator for the TikTok Global
+Trends application. It initializes all necessary components and launches
+the UI or backend services.
 """
 
 import logging
@@ -12,7 +13,7 @@ from pathlib import Path
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.utils.logger import setup_logger
+from src.utils.logger import setup_logger  # noqa: E402
 
 
 def initialize_application() -> None:

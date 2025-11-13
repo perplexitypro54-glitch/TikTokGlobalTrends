@@ -20,7 +20,7 @@ types-requests==2.31.0.7
 
 # Security scanning
 bandit==1.7.5
-safety==2.3.5
+safety>=3.0.1
 
 # Code quality
 coverage==7.3.2
