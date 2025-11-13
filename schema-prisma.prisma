@@ -1,0 +1,495 @@
+// schema.prisma - Banco de dados para TikTok Global Trends
+// Gerado para PostgreSQL
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-py"
+}
+
+// ===== ENUMS =====
+
+enum CountryCode {
+  US  // Estados Unidos
+  BR  // Brasil
+  MX  // México
+  ID  // Indonésia
+  PH  // Filipinas
+  VN  // Vietnã
+  PK  // Paquistão
+  BD  // Bangladesh
+  EG  // Egito
+  NG  // Nigéria
+  TH  // Tailândia
+  JP  // Japão
+  UK  // Reino Unido
+  DE  // Alemanha
+  FR  // França
+}
+
+enum NicheType {
+  BOOKTOK
+  HEALTHTOK
+  DIYTOK
+  GAMINGTOK
+  FINANCETOK
+  MUSICTOK
+  COMEDYTOK
+  ACTIVISMTOK
+  FOODTOK
+  BEAUTYTOK
+  FASHIONTOK
+  DANCETOK
+  COMMERCETOK
+  EDUCATIONTOK
+  LIFESTYLETOK
+  TRAVELLTOK
+  ENTERTAINMENTTOK
+  ARTTOK
+  ENTREPRENEURTOK
+}
+
+enum TrendDirection {
+  UP
+  DOWN
+  STABLE
+}
+
+enum SentimentType {
+  POSITIVE
+  NEGATIVE
+  NEUTRAL
+}
+
+enum UserRole {
+  ADMIN
+  VIEWER
+  ANALYST
+}
+
+enum DataSourceType {
+  OFFICIAL_API
+  CREATIVE_CENTER
+  PLAYWRIGHT_SCRAPER
+}
+
+enum ComplianceRegion {
+  LGPD      // Brasil
+  GDPR      // Europa
+  CCPA      // USA
+  PDPA      // Ásia
+}
+
+// ===== MAIN TABLES =====
+
+model Country {
+  id                    String          @id @default(cuid())
+  code                  CountryCode     @unique
+  name                  String
+  usersInMillions       Float
+  growthRate            Float           // em %
+  timezone              String          // e.g., "America/Sao_Paulo"
+  complianceRegions     ComplianceRegion[]
+  isActive              Boolean         @default(true)
+  
+  hashtags              Hashtag[]
+  creators              Creator[]
+  videos                Video[]
+  sounds                Sound[]
+  trends                Trend[]
+  nicheConfigs          NicheConfig[]
+  collectionSchedules   CollectionSchedule[]
+  
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model Hashtag {
+  id                    String          @id @default(cuid())
+  name                  String          // e.g., "#booktok"
+  country               Country         @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  countryId             String
+  niche                 NicheType
+  
+  // Métricas
+  postsCount            Int             @default(0)
+  viewsCount            BigInt          @default(0)
+  engagementRate        Float           @default(0.0) // em %
+  growthRate            Float           @default(0.0) // em %
+  viralScore            Int             @default(0)   // 0-100
+  trendDirection        TrendDirection  @default(STABLE)
+  
+  // Ranking
+  rank                  Int             // posição 1-50
+  previousRank          Int?            // posição anterior
+  
+  // Data collection
+  dataSource            DataSourceType
+  
+  // Timestamps
+  firstSeen             DateTime        @default(now())
+  lastSeen              DateTime        @updatedAt
+  
+  // Relations
+  videos                Video[]
+  trends                Trend[]
+  
+  @@unique([name, countryId])
+  @@index([countryId, niche])
+  @@index([rank, countryId])
+  @@index([growthRate])
+  @@index([lastSeen])
+}
+
+model Video {
+  id                    String          @id @default(cuid())
+  tiktokVideoId         String          @unique  // ID do TikTok
+  
+  // Creator info
+  creator               Creator         @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId             String
+  
+  // Content
+  title                 String?
+  description           String?
+  
+  // Metrics
+  views                 BigInt          @default(0)
+  likes                 BigInt          @default(0)
+  comments              BigInt          @default(0)
+  shares                BigInt          @default(0)
+  bookmarks             BigInt          @default(0)
+  engagementRate        Float           @default(0.0)
+  viralScore            Float           @default(0.0)
+  
+  // Classification
+  country               Country         @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  countryId             String
+  niches                NicheType[]     // pode ter múltiplos nichos
+  
+  // Tags
+  hashtags              Hashtag[]
+  sounds                Sound[]
+  
+  // Content metadata
+  musicId               String?         // ID da música usada
+  duration              Int?            // em segundos
+  
+  // Timestamps
+  tiktokCreatedAt       DateTime        // quando foi criado no TikTok
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  
+  @@index([creatorId])
+  @@index([countryId, niches])
+  @@index([viralScore])
+  @@index([tiktokCreatedAt])
+}
+
+model Creator {
+  id                    String          @id @default(cuid())
+  tiktokCreatorId       String          @unique
+  username              String
+  displayName           String?
+  profileUrl            String?
+  profileImage          String?
+  
+  // Stats
+  followers             BigInt          @default(0)
+  followerGrowth        Float           @default(0.0)  // em % desde última coleta
+  videosCount           Int             @default(0)
+  likesCount            BigInt          @default(0)
+  averageEngagement     Float           @default(0.0)
+  
+  // Classification
+  country               Country         @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  countryId             String
+  niches                NicheType[]
+  
+  // Trending status
+  isTrending            Boolean         @default(false)
+  trendingRank          Int?
+  
+  // Relations
+  videos                Video[]
+  trends                Trend[]
+  
+  // Timestamps
+  firstSeen             DateTime        @default(now())
+  lastSeen              DateTime        @updatedAt
+  
+  @@index([countryId, isTrending])
+  @@index([followers])
+  @@index([lastSeen])
+}
+
+model Sound {
+  id                    String          @id @default(cuid())
+  tiktokSoundId         String          @unique
+  name                  String
+  artist                String?
+  
+  // Metrics
+  usageCount            Int             @default(0)
+  growthRate            Float           @default(0.0)
+  viralScore            Float           @default(0.0)
+  
+  // Classification
+  country               Country         @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  countryId             String
+  niches                NicheType[]
+  
+  // Ranking
+  rank                  Int
+  trendDirection        TrendDirection  @default(STABLE)
+  
+  // Relations
+  videos                Video[]
+  trends                Trend[]
+  
+  // Timestamps
+  firstSeen             DateTime        @default(now())
+  lastSeen              DateTime        @updatedAt
+  
+  @@unique([tiktokSoundId, countryId])
+  @@index([countryId, rank])
+  @@index([growthRate])
+}
+
+model Trend {
+  id                    String          @id @default(cuid())
+  name                  String          // e.g., "Summer Fashion 2025"
+  
+  // Classification
+  country               Country         @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  countryId             String
+  niches                NicheType[]
+  
+  // Components
+  hashtags              Hashtag[]
+  sounds                Sound[]
+  creators              Creator[]
+  
+  // Metrics
+  viralScore            Float           @default(0.0)
+  momentum              Float           @default(0.0)  // velocidade de crescimento
+  sentiment             SentimentType   @default(NEUTRAL)
+  
+  // Lifecycle
+  startDate             DateTime        @default(now())
+  peakDate              DateTime?       // quando atingiu pico
+  endDate               DateTime?       // NULL = trend ativo
+  isActive              Boolean         @default(true)
+  
+  // Timestamps
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  
+  @@index([countryId, isActive])
+  @@index([viralScore])
+  @@index([startDate])
+}
+
+model Sound {
+  // Modelo completo (duplicado acima para referência)
+  // ...
+}
+
+model NicheConfig {
+  id                    String          @id @default(cuid())
+  niche                 NicheType
+  country               Country         @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  countryId             String
+  
+  // Keywords para classificação
+  keywords              String[]        // array de keywords
+  hashtags              String[]        // hashtags associadas
+  
+  // Configuração
+  isActive              Boolean         @default(true)
+  minConfidenceScore    Float           @default(0.6)
+  
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  
+  @@unique([niche, countryId])
+  @@index([countryId])
+}
+
+model CollectionSchedule {
+  id                    String          @id @default(cuid())
+  country               Country         @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  countryId             String
+  
+  // Schedule config
+  hoursOfDay            Int[]           // e.g., [6, 12, 15, 21] para 4x/dia
+  frequencyPerDay       Int             @default(4)
+  isActive              Boolean         @default(true)
+  
+  // Last execution
+  lastExecutedAt        DateTime?
+  nextExecutionAt       DateTime?
+  
+  // Stats
+  successCount          Int             @default(0)
+  failureCount          Int             @default(0)
+  
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  
+  @@unique([countryId])
+}
+
+// ===== USER & AUTHENTICATION =====
+
+model User {
+  id                    String          @id @default(cuid())
+  email                 String          @unique
+  passwordHash          String
+  
+  // Profile
+  name                  String
+  role                  UserRole        @default(VIEWER)
+  
+  // Access control
+  countriesAccess       CountryCode[]   // quais países pode acessar
+  rateLimit             Int             @default(100) // req/min
+  
+  // Preferences
+  preferences           Json?           // { notificationSettings, theme, etc }
+  
+  // API Keys
+  apiKeys               ApiKey[]
+  
+  // Status
+  isActive              Boolean         @default(true)
+  lastLoginAt           DateTime?
+  
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+  
+  @@index([isActive])
+}
+
+model ApiKey {
+  id                    String          @id @default(cuid())
+  key                   String          @unique        // hashed em produção
+  name                  String
+  
+  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                String
+  
+  // Access control
+  countriesAccess       CountryCode[]   // quais países pode usar
+  rateLimit             Int             @default(100) // req/min
+  
+  // Usage stats
+  requestsCount         Int             @default(0)
+  lastUsedAt            DateTime?
+  
+  // Status
+  isActive              Boolean         @default(true)
+  expiresAt             DateTime?
+  
+  createdAt             DateTime        @default(now())
+  
+  @@index([userId])
+  @@index([isActive])
+}
+
+// ===== LOGS & AUDIT =====
+
+model CollectionLog {
+  id                    String          @id @default(cuid())
+  
+  // Execution info
+  country               CountryCode
+  dataSource            DataSourceType
+  
+  // Results
+  recordsCollected      Int             @default(0)
+  recordsProcessed      Int             @default(0)
+  recordsFailed         Int             @default(0)
+  
+  // Status
+  status                String          // "success", "partial", "failed"
+  errorMessage          String?
+  
+  // Duration
+  startedAt             DateTime
+  completedAt           DateTime?
+  durationSeconds       Int?
+  
+  // Compliance
+  complianceChecked     Boolean         @default(false)
+  
+  createdAt             DateTime        @default(now())
+  
+  @@index([country, createdAt])
+  @@index([status])
+}
+
+model AuditLog {
+  id                    String          @id @default(cuid())
+  
+  user                  User?           @relation("AuditLogUser", fields: [userId], references: [id])
+  userId                String?
+  
+  // Action
+  action                String          // "UPDATE", "DELETE", "ACCESS", etc
+  resourceType          String          // "Hashtag", "Video", etc
+  resourceId            String
+  
+  // Changes
+  previousValue         Json?
+  newValue              Json?
+  
+  // Metadata
+  ipAddress             String?
+  userAgent             String?
+  
+  createdAt             DateTime        @default(now())
+  
+  @@index([userId, createdAt])
+  @@index([action, resourceType])
+}
+
+model ComplianceLog {
+  id                    String          @id @default(cuid())
+  
+  region                ComplianceRegion
+  action                String          // "DATA_DELETE", "RETENTION_CHECK", "GDPR_REQUEST"
+  
+  // Details
+  affectedRecords       Int
+  details               Json?
+  
+  status                String          // "completed", "pending", "failed"
+  
+  createdAt             DateTime        @default(now())
+  completedAt           DateTime?
+  
+  @@index([region, createdAt])
+  @@index([action])
+}
+
+// ===== INDEXES & OPTIMIZATIONS =====
+
+// Índices compostos para queries frequentes
+model _QueryOptimizations {
+  // Índices compostos já são definidos com @@index nas models
+  // Exemplos:
+  // - (countryId, niche) em Hashtag
+  // - (creatorId, countryId) em Video
+  // - (rank, countryId) em Sound
+}
+
+// ===== MIGRATIONS =====
+// Para gerar migrations: npx prisma migrate dev --name initial
+// Para aplicar em produção: npx prisma migrate deploy
