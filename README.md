@@ -2,7 +2,7 @@
 
 A comprehensive system for monitoring and analyzing global TikTok trends across multiple countries using the Official TikTok API, web scraping, and intelligent data processing.
 
-**Status:** 🚀 Initial Scaffold - Phase 1 (Setup & Database)  
+**Status:** 🚀 Phase 1.2 - Models & Integration  
 **Python:** ≥3.11  
 **Stack:** PySimpleGUI + SQLAlchemy + SQLite
 
@@ -74,7 +74,9 @@ cp .env.example .env
 ### 4. Initialize Database
 
 ```bash
-# Database will be created automatically on first run
+# Create database tables and seed initial data
+python scripts/init_database.py
+
 # Data will be stored in ./data/tiktok_trends.db (SQLite)
 ```
 
@@ -94,7 +96,8 @@ python src/main.py
 - ✅ Project structure scaffolding
 - ✅ Environment configuration management
 - ✅ Logging system with file rotation
-- ✅ Database layer with SQLAlchemy
+- ✅ Database layer with SQLAlchemy (models + ORM integration)
+- ✅ Database initialization script with seed data
 - ⏳ TikTok Official API client
 - ⏳ Web scraper for Creative Center
 - ⏳ Data processing pipeline
