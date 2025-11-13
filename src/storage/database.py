@@ -1,12 +1,15 @@
 """
 Database Module
 
-Manages all database operations including CRUD operations and schema
-management.
+Manages all database operations including CRUD operations and schema management.
 """
 
+from typing import Optional
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
+
+from src.storage.models import Base, Country, Creator, Hashtag, Video
 
 
 class DatabaseManager:
@@ -23,7 +26,7 @@ class DatabaseManager:
         self.engine = create_engine(database_url, echo=False)
         self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
-    def get_session(self):
+    def get_session(self) -> Session:
         """
         Get database session.
 
@@ -34,8 +37,11 @@ class DatabaseManager:
 
     def create_tables(self) -> None:
         """Create all tables in the database."""
-        # TODO: Implement table creation using SQLAlchemy
-        pass
+        Base.metadata.create_all(bind=self.engine)
+
+    def drop_tables(self) -> None:
+        """Drop all tables from the database."""
+        Base.metadata.drop_all(bind=self.engine)
 
     def save_hashtag(self, hashtag_data: dict) -> dict:
         """
@@ -47,8 +53,17 @@ class DatabaseManager:
         Returns:
             Saved hashtag data
         """
-        # TODO: Implement save operation
-        return hashtag_data
+        with self.get_session() as session:
+            hashtag = Hashtag(**hashtag_data)
+            session.add(hashtag)
+            session.commit()
+            session.refresh(hashtag)
+            return {
+                "id": hashtag.id,
+                "name": hashtag.name,
+                "rank": hashtag.rank,
+                "country_id": hashtag.country_id,
+            }
 
     def save_video(self, video_data: dict) -> dict:
         """
@@ -60,8 +75,16 @@ class DatabaseManager:
         Returns:
             Saved video data
         """
-        # TODO: Implement save operation
-        return video_data
+        with self.get_session() as session:
+            video = Video(**video_data)
+            session.add(video)
+            session.commit()
+            session.refresh(video)
+            return {
+                "id": video.id,
+                "tiktok_video_id": video.tiktok_video_id,
+                "creator_id": video.creator_id,
+            }
 
     def save_creator(self, creator_data: dict) -> dict:
         """
@@ -73,5 +96,26 @@ class DatabaseManager:
         Returns:
             Saved creator data
         """
-        # TODO: Implement save operation
-        return creator_data
+        with self.get_session() as session:
+            creator = Creator(**creator_data)
+            session.add(creator)
+            session.commit()
+            session.refresh(creator)
+            return {
+                "id": creator.id,
+                "username": creator.username,
+                "tiktok_creator_id": creator.tiktok_creator_id,
+            }
+
+    def get_country_by_code(self, country_code: str) -> Optional[Country]:
+        """
+        Get country by country code.
+
+        Args:
+            country_code: Two-letter country code
+
+        Returns:
+            Country instance or None
+        """
+        with self.get_session() as session:
+            return session.query(Country).filter(Country.code == country_code).first()
