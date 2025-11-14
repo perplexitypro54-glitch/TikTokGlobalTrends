@@ -79,9 +79,7 @@ def init_database(database_url: str = "sqlite:///./data/tiktok_trends.db"):
 
     for country_data in countries_data:
         # Check if country already exists
-        existing = (
-            session.query(Country).filter(Country.code == country_data["code"]).first()
-        )
+        existing = session.query(Country).filter(Country.code == country_data["code"]).first()
         if not existing:
             country = Country(**country_data)
             session.add(country)

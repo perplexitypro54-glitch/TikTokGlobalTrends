@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import List
 
 from sqlalchemy import (
+    Column,
     DateTime,
     Enum,
     Float,
@@ -18,7 +19,6 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
-    Column,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -65,7 +65,11 @@ class Sound(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     last_seen: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, index=True, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        index=True,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
     # Relationships

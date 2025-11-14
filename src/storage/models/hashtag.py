@@ -9,17 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import (
-    BigInteger,
-    DateTime,
-    Enum,
-    Float,
-    ForeignKey,
-    Index,
-    Integer,
-    String,
-    func,
-)
+from sqlalchemy import BigInteger, DateTime, Enum, Float, ForeignKey, Index, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.storage.models.base import Base
@@ -58,7 +48,11 @@ class Hashtag(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     last_seen: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, index=True, server_default=func.now(), onupdate=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        index=True,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
     # Relationships
@@ -66,7 +60,9 @@ class Hashtag(Base):
     videos: Mapped[List["Video"]] = relationship(
         "Video", secondary="video_hashtags", back_populates="hashtags"
     )
-    trends: Mapped[List["Trend"]] = relationship("Trend", back_populates="hashtag")
+    trends: Mapped[List["Trend"]] = relationship(
+        "Trend", secondary="trend_hashtags", back_populates="hashtags"
+    )
 
     __table_args__ = (
         Index("idx_hashtag_name_country", "name", "country_id", unique=True),

@@ -8,12 +8,7 @@ import pytest
 
 from src.storage.database import DatabaseManager
 from src.storage.models import Country, Creator, Hashtag
-from src.storage.models.enums import (
-    CountryCode,
-    DataSourceType,
-    NicheType,
-    TrendDirection,
-)
+from src.storage.models.enums import CountryCode, DataSourceType, NicheType, TrendDirection
 
 
 @pytest.fixture
@@ -179,7 +174,9 @@ class TestModels:
             session.query(Country).filter(Country.code == CountryCode.ID).first()
         )
         assert len(country_with_hashtags.hashtags) == 2
-        assert country_with_hashtags.hashtags[0].name == "#gaming"
+        hashtag_names = [h.name for h in country_with_hashtags.hashtags]
+        assert "#gaming" in hashtag_names
+        assert "#comedy" in hashtag_names
         session.close()
 
     def test_database_manager_save_methods(self, db_manager):
