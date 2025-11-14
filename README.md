@@ -2,7 +2,7 @@
 
 A comprehensive system for monitoring and analyzing global TikTok trends across multiple countries using the Official TikTok API, web scraping, and intelligent data processing.
 
-**Status:** 🚀 Phase 1.2 - Models & Integration  
+**Status:** 🚀 Phase 1.3 - Alembic Migrations & Seeding  
 **Python:** ≥3.11  
 **Stack:** PySimpleGUI + SQLAlchemy + SQLite
 
@@ -74,11 +74,14 @@ cp .env.example .env
 ### 4. Initialize Database
 
 ```bash
-# Create database tables and seed initial data
-python scripts/init_database.py
+# Apply migrations to create the schema
+alembic upgrade head
 
-# Data will be stored in ./data/tiktok_trends.db (SQLite)
+# Seed initial reference data
+python scripts/seed_database.py
 ```
+
+> 💡 Legacy shortcut: `python scripts/init_database.py` is still available for quick local resets.
 
 ### 5. Run Application
 
@@ -97,7 +100,8 @@ python src/main.py
 - ✅ Environment configuration management
 - ✅ Logging system with file rotation
 - ✅ Database layer with SQLAlchemy (models + ORM integration)
-- ✅ Database initialization script with seed data
+- ✅ Database migrations managed via Alembic (upgrade/downgrade)
+- ✅ Seed workflow using `scripts/seed_database.py`
 - ⏳ TikTok Official API client
 - ⏳ Web scraper for Creative Center
 - ⏳ Data processing pipeline

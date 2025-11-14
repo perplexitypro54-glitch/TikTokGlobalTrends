@@ -9,7 +9,7 @@
 
 ## 🎯 VISÃO GERAL
 
-O projeto **TikTok Global Trends** é um sistema de monitoramento e análise de tendências globais do TikTok, desenvolvido com uma arquitetura modular e escalável. Atualmente na **Fase 1.2**, com modelos de banco de dados SQLAlchemy completos e funcionais.
+O projeto **TikTok Global Trends** é um sistema de monitoramento e análise de tendências globais do TikTok, desenvolvido com uma arquitetura modular e escalável. Atualmente na **Fase 1.3**, com migrations Alembic consolidadas e seed automatizado completamente funcional.
 
 ---
 
@@ -71,20 +71,30 @@ O projeto **TikTok Global Trends** é um sistema de monitoramento e análise de 
 
 ---
 
-### ⏳ Fase 1.3 - Migrations com Alembic (PRÓXIMA)
+### ✅ Fase 1.3 - Migrations com Alembic (COMPLETA)
 
-**Status:** 🟡 **PLANEJADA**
+**Período:** Semana 3  
+**Status:** ✅ **100% CONCLUÍDA**
 
-**Objetivos:**
-- [ ] Instalar e configurar Alembic
-- [ ] Gerar migration inicial a partir dos modelos
-- [ ] Criar scripts de upgrade/downgrade
-- [ ] Testar migrations em ambiente de desenvolvimento
-- [ ] Documentar processo de migrations
+**Entregas:**
+- ✅ Alembic configurado (`alembic.ini`, `alembic/env.py`)
+- ✅ Migration inicial `84f99e3be8a6_create_initial_tables.py`
+- ✅ Suporte completo a `upgrade`/`downgrade`
+- ✅ Script de seed idempotente (`scripts/seed_database.py`)
+- ✅ Teste automatizado `tests/test_migrations.py`
+- ✅ Documentação `PHASE_1_3_COMPLETION.md`
 
-**Pré-requisitos:**
-- Modelos SQLAlchemy funcionais ✅
-- DatabaseManager integrado ✅
+**Validação:**
+```bash
+alembic upgrade head
+python scripts/seed_database.py
+pytest tests/test_migrations.py -v
+```
+
+**Integração:**
+- ✅ DatabaseManager compatível com migrations
+- ✅ Scripts legados (`init_database.py`) continuam operacionais
+- ✅ Modelos ORM sincronizados com o schema versionado
 
 ---
 
@@ -273,31 +283,28 @@ hashtag = Hashtag(
 
 ---
 
-### 4. **Script de Inicialização** ✅
+### 4. **Scripts de Banco de Dados** ✅
 
-**Arquivo:** `scripts/init_database.py`
+**Arquivos:**  
+- `scripts/seed_database.py` (recomendado)  
+- `scripts/init_database.py` (legado, ainda suportado)
 
-**Funcionalidades:**
-- Cria diretório `./data`
-- Inicializa todas as tabelas
-- Faz seed de países iniciais (US, BR, ID, MX, JP)
-- Logging de todas as operações
-
-**Uso:**
+**Fluxo recomendado:**
 ```bash
-python scripts/init_database.py
+alembic upgrade head
+python scripts/seed_database.py
 ```
 
-**Saída:**
+**Saída esperada:**
 ```
-INFO - database_init - Initializing database: sqlite:///./data/tiktok_trends.db
-INFO - database_init - Creating database tables...
-INFO - database_init - Database tables created successfully
-INFO - database_init - Seeding initial data...
-INFO - database_init - Added country: United States
+INFO - database_seed - Seeding initial data...
+INFO - database_seed - Added country: United States
+INFO - database_seed - Added country: Brazil
 ...
-INFO - database_init - Database initialization complete!
+INFO - database_seed - Database seeding complete!
 ```
+
+> 💡 O script `init_database.py` continua disponível como atalho único para criar tabelas e realizar seed em um comando.
 
 ---
 
@@ -310,6 +317,7 @@ INFO - database_init - Database initialization complete!
 | `test_api_client.py` | 3 | ✅ PASSA (placeholder) | - |
 | `test_processor.py` | 3 | ✅ PASSA (placeholder) | - |
 | `test_models.py` | 6 | ✅ PASSA | ~80% (modelos) |
+| `test_migrations.py` | 1 | ✅ PASSA | Migrações (upgrade/downgrade) |
 
 ### Executar Testes
 
@@ -319,6 +327,9 @@ pytest tests/ -v
 
 # Apenas testes de modelos
 pytest tests/test_models.py -v
+
+# Testes de migrations (upgrade/downgrade)
+pytest tests/test_migrations.py -v
 
 # Com cobertura
 pytest tests/ --cov=src --cov-report=html
@@ -396,9 +407,14 @@ nano .env
 ### 3. Inicialize Database
 
 ```bash
-# Cria tabelas e seed de dados
-python scripts/init_database.py
+# Aplica migrations e prepara o schema
+alembic upgrade head
+
+# Seed inicial de dados
+python scripts/seed_database.py
 ```
+
+> 💡 Atalho legado: `python scripts/init_database.py` continua disponível para resets rápidos.
 
 ### 4. Execute a Aplicação
 
@@ -429,7 +445,7 @@ pytest tests/test_models.py -v
 | **Linhas de código** | ~2.000 |
 | **Modelos SQLAlchemy** | 6 |
 | **Tabelas de banco** | 10 (6 principais + 4 associação) |
-| **Testes automatizados** | 12 |
+| **Testes automatizados** | 13 |
 | **Enumerações** | 5 |
 | **Dependências runtime** | 60+ |
 | **Dependências dev** | 10+ |
@@ -441,7 +457,7 @@ pytest tests/test_models.py -v
 | **Black** | ✅ | 100% formatado |
 | **Flake8** | ✅ | 0 erros |
 | **Mypy** | ✅ | 0 erros (20 arquivos) |
-| **Pytest** | ✅ | 12/12 testes passando |
+| **Pytest** | ✅ | 13/13 testes passando |
 | **Isort** | ✅ | Imports organizados |
 
 ---
@@ -452,9 +468,10 @@ pytest tests/test_models.py -v
 
 - **Logging ↔ Main:** Entry point usa sistema de logging
 - **DatabaseManager ↔ Models:** Manager integrado com modelos SQLAlchemy
+- **Alembic ↔ ORM:** Migrations refletem fielmente os modelos declarativos
 - **Models ↔ Enums:** Modelos usam enumerações tipadas
 - **Tests ↔ Models:** Testes validam modelos e relações
-- **Scripts ↔ DatabaseManager:** Script de init usa DatabaseManager
+- **Scripts ↔ DatabaseManager:** Scripts de seed e init usam DatabaseManager
 
 ### ✅ Backward Compatibility
 
@@ -476,7 +493,7 @@ O projeto requer instalação de dependências:
 pip install -r requirements.txt
 ```
 
-Sem isso, o script `init_database.py` falhará com:
+Sem isso, os comandos `alembic upgrade head` e `python scripts/seed_database.py` falharão com:
 ```
 ModuleNotFoundError: No module named 'sqlalchemy'
 ```
@@ -484,16 +501,16 @@ ModuleNotFoundError: No module named 'sqlalchemy'
 ### 2. Database Location
 
 Por padrão, o banco SQLite é criado em `./data/tiktok_trends.db`. Certifique-se de:
-- Executar `init_database.py` antes de usar o banco
+- Executar `alembic upgrade head` seguido de `python scripts/seed_database.py` antes de usar o banco
 - Adicionar `data/` ao `.gitignore` (já incluído)
 
-### 3. Migrations Manuais
+### 3. Fluxo de Migrations
 
-Atualmente, alterações no schema requerem:
-- Drop e recreate das tabelas (perda de dados)
-- Ou migration manual
+- Sempre aplicar `alembic upgrade head` após atualizar o projeto
+- Utilize `alembic downgrade base` apenas em ambientes de desenvolvimento para testes
+- Valide o estado das migrations executando `pytest tests/test_migrations.py -v`
 
-**Solução:** Implementar Alembic na Fase 1.3
+> ✅ O sistema de migrations está versionado e sincronizado com os modelos ORM.
 
 ### 4. Testes de API e Scraping
 
@@ -523,10 +540,10 @@ Testes de `test_api_client.py` e `test_processor.py` são placeholders. Implemen
 
 ### Curto Prazo (1-2 semanas)
 
-1. **Fase 1.3 - Alembic Migrations**
-   - Configurar Alembic
-   - Gerar migration inicial
-   - Testar upgrade/downgrade
+1. **Fase 2 - TikTok Official API**
+   - Implementar autenticação OAuth2 e caching de token
+   - Persistir hashtags/vídeos usando o DatabaseManager
+   - Cobrir integrações com testes automatizados
 
 2. **Refinar DatabaseManager**
    - Adicionar métodos de busca avançados
@@ -534,21 +551,21 @@ Testes de `test_api_client.py` e `test_processor.py` são placeholders. Implemen
    - Tratamento de erros robusto
 
 3. **Expandir Testes**
-   - Testes de relações complexas
-   - Testes de performance
-   - Testes de constraints
+   - Testes adicionais para migrations e rollback
+   - Cobertura para scripts de seed
+   - Preparação para testes do cliente oficial
 
 ### Médio Prazo (3-4 semanas)
 
-4. **Fase 2 - TikTok API Integration**
-   - Autenticação OAuth2
-   - Coleta de dados reais
-   - Rate limiting
+4. **Fase 3 - Web Scraping**
+   - Playwright scrapers com tratamento de erros
+   - Integração com Creative Center
+   - Implementar camada de cache
 
-5. **Fase 3 - Web Scraping**
-   - Playwright scrapers
-   - Creative Center integration
-   - Cache system
+5. **Fase 3 - Data Processing & Classificação**
+   - Pipeline de limpeza e enriquecimento de dados
+   - Classificador de nichos multi-país
+   - Validações e testes de consistência
 
 ### Longo Prazo (5-8 semanas)
 
@@ -576,7 +593,7 @@ Testes de `test_api_client.py` e `test_processor.py` são placeholders. Implemen
 # Ambiente completo em 3 comandos
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt -r requirements-dev.txt
-python scripts/init_database.py
+alembic upgrade head && python scripts/seed_database.py
 ```
 
 ### Desenvolvimento Local
@@ -633,6 +650,6 @@ Para questões técnicas, consulte:
 ---
 
 **Documento gerado em:** 2025-11-13  
-**Última atualização:** Fase 1.2 completa  
-**Próxima revisão:** Após Fase 1.3 (Migrations)  
+**Última atualização:** Fase 1.3 completa  
+**Próxima revisão:** Após Fase 2 (TikTok Official API)  
 **Mantenedor:** AI Development Team
