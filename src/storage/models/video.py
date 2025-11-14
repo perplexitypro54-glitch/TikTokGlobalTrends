@@ -11,6 +11,7 @@ from typing import List, Optional
 
 from sqlalchemy import (
     BigInteger,
+    Column,
     DateTime,
     Float,
     ForeignKey,
@@ -18,7 +19,6 @@ from sqlalchemy import (
     Integer,
     String,
     Table,
-    Column,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
