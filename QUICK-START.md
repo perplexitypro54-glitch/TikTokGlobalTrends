@@ -35,8 +35,8 @@
 ### 3. Setup Inicial (1 hora)
 ```bash
 # Clone/crie repositório
-git init tiktok-global-trends
-cd tiktok-global-trends
+git init TikTokGlobalTrends
+cd TikTokGlobalTrends
 
 # Crie estrutura básica
 mkdir -p src tests docs logs
@@ -102,7 +102,7 @@ git commit -m "feat: Phase 1 - Setup and database configuration"
 ## 📊 ESTRUTURA RECOMENDADA
 
 ```
-tiktok-global-trends/
+TikTokGlobalTrends/
 ├── 📄 README.md (Este documento)
 ├── 📄 requirements.txt
 ├── 📄 .env.example
@@ -193,8 +193,8 @@ npx prisma migrate dev --name init
 
 ```bash
 # Clone repo
-git clone https://github.com/seu-user/tiktok-global-trends.git
-cd tiktok-global-trends
+git clone https://github.com/perplexitypro54-glitch/TikTokGlobalTrends.git
+cd TikTokGlobalTrends
 
 # Setup
 python -m venv venv
@@ -225,6 +225,27 @@ flake8 src/
 # Docker
 docker build -t tiktok-trends:latest .
 docker run -p 8000:8000 tiktok-trends:latest
+```
+
+## 🔁 Como manter o GitHub atualizado
+
+Use as instruções abaixo para sincronizar seu trabalho com o GitHub:
+
+```bash
+# Verifique o que mudou
+git status
+
+# Adicione arquivos específicos ou tudo
+git add <arquivo-ou-pasta>  # exemplo: git add src/main.py
+
+# Crie um commit descritivo
+git commit -m "feat: descreva sua alteração"
+
+# Envie para o GitHub (substitua main pelo nome da sua branch se necessário)
+git push origin main
+
+# Baixe as novidades antes de começar uma nova tarefa
+git pull --rebase origin main
 ```
 
 ---

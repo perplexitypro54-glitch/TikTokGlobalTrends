@@ -34,8 +34,8 @@ A comprehensive system for monitoring and analyzing global TikTok trends across 
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd tiktok-global-trends
+git clone https://github.com/perplexitypro54-glitch/TikTokGlobalTrends.git
+cd TikTokGlobalTrends
 
 # Create virtual environment
 python -m venv venv
@@ -85,6 +85,27 @@ python scripts/init_database.py
 ```bash
 # Start the application
 python src/main.py
+```
+
+### 6. Keep GitHub Updated
+
+Use these commands whenever you need to push new work or pull the latest changes:
+
+```bash
+# Check what changed
+git status
+
+# Stage files (repeat as needed)
+git add <file-or-folder>  # e.g., git add src/main.py
+
+# Commit with a descriptive message
+git commit -m "feat: describe your change"
+
+# Push updates to GitHub (replace main with your current branch)
+git push origin main
+
+# Pull the newest changes before starting a new task
+git pull --rebase origin main
 ```
 
 ---
@@ -178,8 +199,8 @@ python src/main.py
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/your-user/tiktok-global-trends.git
-cd tiktok-global-trends
+git clone https://github.com/perplexitypro54-glitch/TikTokGlobalTrends.git
+cd TikTokGlobalTrends
 
 # 2. Create isolated Python environment
 python3.11 -m venv venv
@@ -344,7 +365,7 @@ bandit -r src/
 ## 📁 Project Structure
 
 ```
-tiktok-global-trends/
+TikTokGlobalTrends/
 │
 ├── 📄 README.md                   # This file
 ├── 📄 pyproject.toml              # Project metadata and tool config
@@ -455,7 +476,7 @@ tiktok-global-trends/
 **Solution:**
 ```bash
 # Make sure you're in the project root directory
-cd /path/to/tiktok-global-trends
+cd /path/to/TikTokGlobalTrends
 
 # Activate virtual environment
 source venv/bin/activate
