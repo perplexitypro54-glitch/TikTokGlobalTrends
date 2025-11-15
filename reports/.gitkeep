@@ -1,0 +1,10 @@
+# Reports Directory
+
+This directory will contain generated reports from the reporting system.
+
+Reports are generated using:
+```bash
+python scripts/generate_report.py --type <type> --format <format>
+```
+
+See docs/RELATORIO_ACOES.md for full documentation.
